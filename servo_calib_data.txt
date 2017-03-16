@@ -1,0 +1,24 @@
+Port:23, PWM_mi:-118, PWM_ma:103
+Port:22, PWM_mi: 239, PWM_ma:-238
+Port:21, PWM_mi:-178, PWM_ma:233
+
+Port:19, PWM_mi:-120, PWM_ma:89
+Port:18, PWM_mi: 225, PWM_ma:-231
+Port:17, PWM_mi:-248, PWM_ma:167
+
+Port:14, PWM_mi:-131, PWM_ma:70
+Port:13, PWM_mi: 244, PWM_ma:-235
+Port:12, PWM_mi:-214, PWM_ma:212
+
+Port:11, PWM_mi:  99, PWM_ma:-124
+Port:10, PWM_mi:-241, PWM_ma:247
+Port:9, PWM_mi:  243, PWM_ma:-200
+
+Port:6, PWM_mi:  -19, PWM_ma:168
+Port:5, PWM_mi: -234, PWM_ma:223
+Port:4, PWM_mi:  220, PWM_ma:-189
+
+Port:2, PWM_mi:   96, PWM_ma:-114
+Port:1, PWM_mi: -242, PWM_ma:209
+Port:0, PWM_mi:  230, PWM_ma:-200
+

@@ -75,6 +75,10 @@ LegCtrl::LegCtrl(std::string const & servo_dev) : mFs(io) {
     }
 
     mReady = false;
+
+    for(int i = 0; i < NUM_OF_LEGS; i++) { 
+		mSleepAngles[i] = mLegs[i]->GetAngle();
+	}
 }
 
 /**
@@ -149,71 +153,27 @@ TAngles LegCtrl::GetAngles(int ID) const {
  * \author	Josef Sommerauer
  */
 void LegCtrl::ReadyPosition() {
-	std::vector<TAngles> mStartAng;
+
 	std::vector<TAngles> mEndAng;
 
 	for(int i = 0; i < NUM_OF_LEGS; i++) { 
-		mStartAng.push_back(mLegs[i]->GetAngle());
-		T3DPosition mEndPos = mLegs[i]->GetOriginPos();
-		mEndAng.push_back(mInvKin.CalculateAngles(i, mEndPos));
+		m3DPos[i] = mLegs[i]->GetOriginPos();
+		mEndAng.push_back(mInvKin.CalculateAngles(i, m3DPos[i]));
 	}
 
-	int nrSteps = 5;
+	int nrSteps = 25;
 
 	for (int j = 1; j <= nrSteps; j++) {
 	   for(int i = 0; i < NUM_OF_LEGS; i++) {
-	   		TAngles tmp = (mStartAng[i] - mEndAng[i]) / nrSteps; // gesamt
-	   		TAngles now = tmp * j;
-
-	   		if(i == 0) {
-	   		std::cout << now.AngleFemur << ";"
-					  << now.AngleTibia << ";"
-					  << now.angles.AngleTarsus << std::endl;
-	   		}
-
+	   		TAngles tmp = (mEndAng[i] - mSleepAngles[i]) / nrSteps; // gesamt
+	   		TAngles now = mSleepAngles[i] + (tmp * j);
 			if(!mLegs[i]->SetAngle(now)) {std::cout << "error";}
 			
 	   }
-	   usleep(400000);
+	   usleep(10000);
 	}
 
-	/*
-
-   // set 1. pair of legs
-   for(int i = 0; i < NUM_OF_LEGS; i++) {
-		m3DPos[i] = mLegs[i]->GetOriginPos();
-		TAngles angles = mInvKin.CalculateAngles(i, m3DPos[i]);
-
-		if(!mLegs[i]->SetAngle(angles)) {
-		std::cout << "error setting angle. Leg " << i 
-					 << " femur:" << angles.AngleFemur
-					 << " tibia:" << angles.AngleTibia
-					 << " tarsus:" <<	angles.AngleTarsus
-					 << std::endl;
-		}
-   }
-
-    // wait to reduce peak current 
-                  // otherwise brownout detection 
-                  // would shutdown the pandaboard
-
-   // set 1. pair of legs
-   for(int i = 1; i < NUM_OF_LEGS; i+=2) {
-		m3DPos[i] = mLegs[i]->GetOriginPos();
-		TAngles angles = mInvKin.CalculateAngles(i, m3DPos[i]);
-
-		if(!mLegs[i]->SetAngle(angles)) {
-		std::cout << "error setting angle. Leg " << i 
-					 << " femur:" << angles.AngleFemur
-					 << " tibia:" << angles.AngleTibia
-					 << " tarsus:" <<	angles.AngleTarsus
-					 << std::endl;
-		}
-   }
-
-   */
-
-   mReady = true;
+   	mReady = true;
 }
 
 /*
@@ -248,9 +208,29 @@ void LegCtrl::AllOff() {
  * \author	Josef Sommerauer
  */
 void LegCtrl::AllSleep() {
+	/*
     for(int i = 0; i < NUM_OF_LEGS; i++) {
         mLegs[i]->Sleep();
     }
+    */
+    std::vector<TAngles> mStartAng;
+
+	for(int i = 0; i < NUM_OF_LEGS; i++) { 
+		mStartAng.push_back(mLegs[i]->GetAngle());
+	}
+
+	int nrSteps = 25;
+
+	for (int j = 1; j <= nrSteps; j++) {
+	   for(int i = 0; i < NUM_OF_LEGS; i++) {
+	   		TAngles tmp = (mSleepAngles[i] - mStartAng[i]) / nrSteps; // gesamt
+	   		TAngles now = mStartAng[i] + (tmp * j);
+			if(!mLegs[i]->SetAngle(now)) {std::cout << "error";}
+	   }
+	   usleep(10000);
+	}
+	usleep(100000);
+   	mReady = true;
 }
 
 /*

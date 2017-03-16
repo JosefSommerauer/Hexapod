@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name=viewport content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name=apple-mobile-web-app-capable content=yes>
+<meta name=apple-mobile-web-app-status-bar-style content=black>
+
+<title>HexaMote</title>
+
+	<link rel="stylesheet" media="screen and (min-device-width: 801px)"      href="css/style.css"        type="text/css" />
+	<link rel="stylesheet" media="only screen and (max-device-width: 800px)" href="css/style_mobile.css" type="text/css" />
+
+	<!-- new androids -->
+	<link rel="stylesheet" media="screen and (-webkit-device-pixel-ratio:0.75)" href="css/style_mobile.css" />
+	<link rel="stylesheet" media="handheld" href="css/style_mobile.css" type="text/css" />
+
+</head>
+
+<script src="/scripts/jquery-1.9.1.min.js"></script>
+<script>
+/********** CODE FOR CONTROLBUTTONS **********/
+
+$(document).ready(function(){
+  $("button").click(function(){
+    var posting = $.post("set_message.php", {Message:$(this).attr('value')}) 
+    .fail(function() { 
+      alert("error"); 
+    })
+    .done(function( data ) {
+      $( "#result" ).empty().append(data);
+    });
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+    /* THIS FUNCTION IS TO FETCH INT PARAMETER VALUES */
+    function getIntParametera(param) {
+        var val = document.URL;
+        var url = val.substr(val.indexOf(param))  
+        var n=parseInt(url.replace(param+"=",""));
+        return n; 
+    }
+
+    /*THIS FUNCTION IS TO FETCH STRING PARAMETER*/
+    function getStringParameter(param) {
+        var val = document.URL;
+        var url = val.substr(val.indexOf(param))  
+        var n=url.replace(param+"=","");
+        return n; 
+    }
+
+/*********** CODE FOR WEBCAM **********/
+
+/* Copyright (C) 2007 Richard Atterer, richardÂ©atterer.net
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License, version 2. See the file
+   COPYING for details. */
+
+var imageNr = 0; // Serial number of current image
+var finished = new Array(); // References to img objects which have finished downloading
+var paused = false;
+
+function createImageLayer() {
+  var img = new Image();
+  img.style.position = "absolute";
+  img.style.zIndex = -1;
+  img.onload = imageOnload;
+  img.onclick = imageOnclick;
+  img.src = "http://<?php $_SERVER['SERVER_ADDR'] ?>:8080/?action=snapshot&n=" + (++imageNr);
+  var webcam = document.getElementById("webcam");
+  webcam.insertBefore(img, webcam.firstChild);
+}
+
+// Two layers are always present (except at the very beginning), to avoid flicker
+function imageOnload() {
+  this.style.zIndex = imageNr; // Image finished, bring to front!
+  while (1 < finished.length) {
+    var del = finished.shift(); // Delete old image(s) from document
+    del.parentNode.removeChild(del);
+  }
+  finished.push(this);
+  if (!paused) createImageLayer();
+}
+
+function imageOnclick() { // Clicking on the image will pause the stream
+  paused = !paused;
+  if (!paused) createImageLayer();
+}
+
+</script>
+
+<script type='text/javascript' charset='utf-8'>
+    function hideAddressBar(){
+  if(document.documentElement.scrollHeight<window.outerHeight/window.devicePixelRatio)
+    document.documentElement.style.height=(window.outerHeight/window.devicePixelRatio)+'px';
+  setTimeout(window.scrollTo(1,1),0);
+}
+window.addEventListener("load",function(){hideAddressBar();});
+window.addEventListener("orientationchange",function(){hideAddressBar();});
+</script> 
+
+<body onload="createImageLayer();" style="border:0;margin:0;padding:0">
+<div id="page">
+<div id="webcam"><noscript><img src="http://<?php $_SERVER['SERVER_ADDR'] ?>:8080/?action=snapshot" /></noscript></div>
+
+<div id="control">
+ <div>Server:
+    <div><button id="Message" name="Message" value="server-start" title="Server Start">Start</button></div>
+    <div><button id="Message" name="Message" value="server-stop"  title="Server Stop" >Stop </button></div>
+ </div>
+
+ <div>Webcam:
+    <div><button id="Message" name="Message" value="webcam-start" title="Webcam Start">Start</button></div>
+    <div><button id="Message" name="Message" value="webcam-stop"  title="Webcam Stop" >Stop </button></div>
+ </div>
+ <div id="motion">
+  <div>Control:
+    <div><button id="Message" name="Message" value="Go-forward" title="Go forward"> F </button></div>
+    <div><button id="Message" name="Message" value="Go-backwards"  title="Go backwards" > B </button></div>
+    <div><button id="Message" name="Message" value="Go-left" title="Go left"> < </button></div>
+    <div><button id="Message" name="Message" value="Go-right"  title="Go right" > > </button></div>
+ </div>
+
+ </div>
+</div>
+</div>
+
+
+</body>
+</html>
+

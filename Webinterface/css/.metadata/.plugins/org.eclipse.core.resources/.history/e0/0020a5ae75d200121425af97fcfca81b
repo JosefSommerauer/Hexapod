@@ -1,0 +1,147 @@
+<?php
+/*
+ * Created on May 7, 2013
+ *
+ * Erstellt:			Lehner Matthias
+ * Beschreibung: TCP Socketverbindung, als Client ausgeführt
+*/
+	//Positions of the types
+	define(CMD_POS, 0);
+	define(TYPE_POS, 1);
+	//define(MSG_POS, 2);
+	//Command -----------------------
+	define(CMD, 0x01);
+	//TYPE_CMD
+	define(WALK, 0x01);
+	//Walk Commands
+	define(FORW, 0x01);
+	define(FORW_POS, 2);
+	define(BACKW, 0x02);
+	define(BACKW_POS, 3);
+	define(LEFT, 0x03);
+	define(LEFT_POS, 4);
+	define(RIGHT, 0x04);
+	define(RIGHT_POS, 5);
+	//---------------------
+	//Rotate Commands
+	define(ROT, 0x02);
+	define(LEFT, 0x01);
+	define(LEFT_POS, 2);
+	define(RIGHT, 0x02);
+	define(RIGHT_POS, 3);
+	//----------------------
+	define(HEIGTH, 0x03);
+	define(BAT_STAT, 0x64);
+	//Text
+	define(TXT, 0x02);
+	//TYPE_TXT
+	define(NORMAL, 0x01);
+	define(WARNING, 0x02);
+	define(ERROR, 0x03);
+	//Receive
+	define(ACK, 0x06);
+	define(NAK, 0x15);
+	
+	$host="127.0.0.1";
+    $port = 50000;
+	$message = "Hallo Martin";
+	//create struct for protokoll
+	
+	$protokoll = array("COMMAND", "TYPE", "MSG");
+	
+    // create socket
+    $socket = socket_create(AF_INET, SOCK_STREAM, 0);
+    if(!$socket)
+    	die("Could not create socket\n");
+
+	echo "Socket created.\n";
+	//binding is required because of sending and receiving
+	//$client_side_sock = dirname(__FILE__)."/client.sock";
+	//if(!socket_bind($socket, $client_side_cock))
+	//	die("Unable to bind to $client_side_sock");
+	
+    // connect to server
+    $result = socket_connect($socket, $host, $port);
+    if(!$result)
+    	die("Could not connect to server\n");
+	echo "connected to server. Write to server...\n";
+	//listen to browser und create the protocol
+	while(1) {
+		//sleep 200ms
+		time_naonsleep(0, 200000000);
+		//create message according to the input of the user
+		//navgigation input
+		$protokoll[COM_POS] = CMD;
+		$protokoll[TYPE_POS] = WALK;
+
+	switch ($_POST["Message"]) {
+	    case "server-start":
+	        echo shell_exec('cd /home/robsoft3g/repo/trunk/HexapodServerApplikation/build && ./ServerApplikation');
+	        //echo shell_exec('whoami');
+	        break;
+	    case "server-stop":
+	        echo shell_exec('killall -v ServerApplikation');
+	        break;
+	    case "webcam-start":
+	        echo shell_exec('/etc/init.d/mjpg_streamer start');
+	        break;
+	    case "webcam-stop":
+	        echo shell_exec('/etc/init.d/mjpg_streamer stop');
+	        break;
+		case "Go-forward":
+			echo "walking forward\n";
+			$protokoll[FORW_POS] = 255;
+			$protokoll[BACKW_POS] = 0;
+			$protokoll[LEFT_POS] = 0;
+			$protokoll[RIGHT_POS] = 0;
+			break;
+		case "Go-backwards":
+			echo "walking backwards\n";
+			$protokoll[FORW_POS] = 0;
+			$protokoll[BACKW_POS] = 255;
+			$protokoll[LEFT_POS] = 0;
+			$protokoll[RIGHT_POS] = 0;
+			break;
+		case "Go-left":
+			echo "walking left\n";
+			$protokoll[FORW_POS] = 0;
+			$protokoll[BACKW_POS] = 0;
+			$protokoll[LEFT_POS] = 255;
+			$protokoll[RIGHT_POS] = 0;
+			break;
+		case "Go-right":
+			echo "walking right\n";
+			$protokoll[FORW_POS] = 0;
+			$protokoll[BACKW_POS] = 0;
+			$protokoll[LEFT_POS] = 0;
+			$protokoll[RIGHT_POS] = 255;
+			break;
+		default:
+			$protokoll[FORW_POS] = 0;
+			$protokoll[BACKW_POS] = 0;
+			$protokoll[LEFT_POS] = 0;
+			$protokoll[RIGHT_POS] = 0;
+			echo "message not correct";
+			} 
+
+		// send string to server
+	    socket_write($socket, $message, strlen($message)) or die("Could not send data to server\n");
+		echo "Wrote the message to server. Wait for a message from server...";
+		
+	    $ecko = socket_read ($socket, 1024) or die("Could not read server response\n");
+		//print to console
+		echo "Message from Server: $ecko";
+	}
+	
+    // end session
+    socket_write($socket, "END", 3) or die("Could not end session\n");
+    echo "Session will be closed.\n";
+	
+    // close socket
+    socket_close($socket);
+
+    // clean up result
+    $result = trim($result);
+    $result = substr($result, 0, strlen($result)-1);
+    
+?>
